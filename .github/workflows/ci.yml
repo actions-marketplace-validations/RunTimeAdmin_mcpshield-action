@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parity self-test (pin scorer to the canonical MCPShield engine)
+        run: python3 mcp_scan.py --self-test test-fixtures/risk_scoring_cases.json
+
+      - name: Dogfood the action on the sample config
+        id: scan
+        uses: ./
+        with:
+          paths: examples/sample-mcp.json
+          fail-on: never
+
+      - name: Assert the action detected + scored the sample
+        run: |
+          echo "level=${{ steps.scan.outputs.max-level }} score=${{ steps.scan.outputs.max-score }} count=${{ steps.scan.outputs.server-count }}"
+          test "${{ steps.scan.outputs.max-level }}" = "high"
+          test "${{ steps.scan.outputs.server-count }}" = "3"

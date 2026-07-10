@@ -1,0 +1,137 @@
+[
+  {
+    "name": "clean custom server",
+    "server_type": "custom-notes-tool",
+    "command": null,
+    "scope": null,
+    "env_vars": [],
+    "tools": [],
+    "tool_findings": [],
+    "expected_score": 0.0,
+    "expected_level": "low"
+  },
+  {
+    "name": "filesystem + home scope",
+    "server_type": "@modelcontextprotocol/server-filesystem",
+    "command": "npx -y @modelcontextprotocol/server-filesystem /home/user",
+    "scope": "/home/user",
+    "env_vars": [],
+    "tools": [],
+    "tool_findings": [],
+    "expected_score": 35.0,
+    "expected_level": "medium"
+  },
+  {
+    "name": "direct shell command",
+    "server_type": null,
+    "command": "bash -lc ls",
+    "scope": null,
+    "env_vars": [],
+    "tools": [],
+    "tool_findings": [],
+    "expected_score": 35.0,
+    "expected_level": "medium"
+  },
+  {
+    "name": "docker run",
+    "server_type": null,
+    "command": "docker run -it ubuntu",
+    "scope": null,
+    "env_vars": [],
+    "tools": [],
+    "tool_findings": [],
+    "expected_score": 20.0,
+    "expected_level": "low"
+  },
+  {
+    "name": "sudo elevated",
+    "server_type": null,
+    "command": "sudo npx some-server",
+    "scope": null,
+    "env_vars": [],
+    "tools": [],
+    "tool_findings": [],
+    "expected_score": 15.0,
+    "expected_level": "low"
+  },
+  {
+    "name": "sensitive env vars",
+    "server_type": "api-gateway",
+    "command": null,
+    "scope": null,
+    "env_vars": [
+      "OPENAI_API_KEY",
+      "HOME",
+      "DB_PASSWORD"
+    ],
+    "tools": [],
+    "tool_findings": [],
+    "expected_score": 40.0,
+    "expected_level": "medium"
+  },
+  {
+    "name": "risky tools",
+    "server_type": "toolbox",
+    "command": null,
+    "scope": null,
+    "env_vars": [],
+    "tools": [
+      {
+        "name": "execute_command",
+        "description": ""
+      },
+      {
+        "name": "write_file",
+        "description": "Write content to a file"
+      },
+      {
+        "name": "fetch_url",
+        "description": "HTTP fetch a URL"
+      }
+    ],
+    "tool_findings": [],
+    "expected_score": 50.0,
+    "expected_level": "medium"
+  },
+  {
+    "name": "tool poisoning",
+    "server_type": "weather",
+    "command": null,
+    "scope": null,
+    "env_vars": [],
+    "tools": [],
+    "tool_findings": [
+      {
+        "tool": "get_forecast",
+        "score": 1.0,
+        "reasons": [
+          "prompt-injection phrasing detected"
+        ]
+      }
+    ],
+    "expected_score": 30.0,
+    "expected_level": "medium"
+  },
+  {
+    "name": "critical combo",
+    "server_type": "@modelcontextprotocol/server-filesystem",
+    "command": "bash run.sh",
+    "scope": "~/.ssh",
+    "env_vars": [
+      "AWS_SECRET_ACCESS_KEY"
+    ],
+    "tools": [
+      {
+        "name": "run_shell",
+        "description": ""
+      },
+      {
+        "name": "delete_file",
+        "description": "delete a file"
+      }
+    ],
+    "tool_findings": [],
+    "expected_score": 100.0,
+    "expected_level": "critical"
+  }
+]

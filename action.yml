@@ -1,0 +1,52 @@
+name: 'MCPShield MCP Config Scan'
+description: 'Static risk scan of committed MCP config files (mcp.json, cline_mcp_settings.json, claude_desktop_config.json). Catch risky MCP servers in a PR before merge.'
+author: 'MCPShield'
+
+branding:
+  icon: 'shield'
+  color: 'blue'
+
+inputs:
+  paths:
+    description: 'Comma- or newline-separated globs of config files to scan. Leave empty to auto-discover common MCP config filenames repo-wide.'
+    required: false
+    default: ''
+  fail-on:
+    description: 'Fail the job if any server is at or above this level: critical | high | medium | low | never.'
+    required: false
+    default: 'high'
+  working-directory:
+    description: 'Directory to scan from (relative to the repo root).'
+    required: false
+    default: '.'
+
+outputs:
+  max-score:
+    description: 'Highest risk score found (0-100).'
+    value: ${{ steps.scan.outputs.max-score }}
+  max-level:
+    description: 'Highest risk level found (low | medium | high | critical).'
+    value: ${{ steps.scan.outputs.max-level }}
+  server-count:
+    description: 'Number of MCP servers scanned.'
+    value: ${{ steps.scan.outputs.server-count }}
+  findings-json:
+    description: 'JSON array of scored servers (name, score, level, factors).'
+    value: ${{ steps.scan.outputs.findings-json }}
+
+runs:
+  using: 'composite'
+  steps:
+    - id: scan
+      shell: bash
+      run: |
+        PY="$(command -v python3 || command -v python || true)"
+        if [ -z "$PY" ]; then
+          echo "::error::Python 3 is required to run the MCPShield scan but was not found on this runner."
+          exit 1
+        fi
+        "$PY" "$GITHUB_ACTION_PATH/mcp_scan.py" \
+          --paths "${{ inputs.paths }}" \
+          --fail-on "${{ inputs.fail-on }}" \
+          --working-directory "${{ inputs.working-directory }}" \
+          --github
