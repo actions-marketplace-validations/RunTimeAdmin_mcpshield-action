@@ -1,6 +1,8 @@
 # MCPShield MCP Config Scan
 
 [![CI](https://github.com/RunTimeAdmin/mcpshield-action/actions/workflows/ci.yml/badge.svg)](https://github.com/RunTimeAdmin/mcpshield-action/actions/workflows/ci.yml)
+[![GitHub Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-mcpshield--action-2ea44f?logo=github&logoColor=white)](https://github.com/marketplace/actions/mcpshield-mcp-config-scan)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 Static, shift-left risk scan for **MCP config files** committed to a repo
 (`mcp.json`, `.cursor/mcp.json`, `cline_mcp_settings.json`,
