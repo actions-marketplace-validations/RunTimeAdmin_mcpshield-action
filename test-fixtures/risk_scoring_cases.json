@@ -133,5 +133,38 @@
     "tool_findings": [],
     "expected_score": 100.0,
     "expected_level": "critical"
+  },
+  {
+    "name": "hardcoded openai key in command",
+    "server_type": null,
+    "command": "node app.js --openai sk-abc123def456ghi789jkl012",
+    "scope": null,
+    "env_vars": [],
+    "tools": [],
+    "tool_findings": [],
+    "expected_score": 30.0,
+    "expected_level": "medium"
+  },
+  {
+    "name": "postgres with embedded credentials",
+    "server_type": "custom-postgres-mcp",
+    "command": "npx dbhub --dsn postgresql://admin:hunter2@prod.db.internal/customers",
+    "scope": null,
+    "env_vars": [],
+    "tools": [],
+    "tool_findings": [],
+    "expected_score": 45.0,
+    "expected_level": "medium"
+  },
+  {
+    "name": "aws key with shell",
+    "server_type": null,
+    "command": "bash -c AKIAIOSFODNN7EXAMPLE",
+    "scope": null,
+    "env_vars": [],
+    "tools": [],
+    "tool_findings": [],
+    "expected_score": 65.0,
+    "expected_level": "high"
   }
 ]

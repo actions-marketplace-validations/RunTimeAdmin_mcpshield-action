@@ -50,6 +50,33 @@ _SENSITIVE_ENV_RE = re.compile(
     re.IGNORECASE,
 )
 
+# High-confidence hardcoded-secret patterns, matched against the command string
+# so a credential embedded in an MCP config (e.g. an inline DB password) is
+# flagged. Only the credential TYPE is surfaced — values are never captured.
+_SECRET_PATTERNS = [
+    (re.compile(r"AKIA[0-9A-Z]{16}"), "AWS access key"),
+    (re.compile(r"ghp_[A-Za-z0-9]{36}"), "GitHub token"),
+    (re.compile(r"github_pat_[A-Za-z0-9_]{22,}"), "GitHub token"),
+    (re.compile(r"xox[baprs]-[A-Za-z0-9-]{10,}"), "Slack token"),
+    (re.compile(r"sk-ant-[A-Za-z0-9_-]{20,}"), "Anthropic API key"),
+    (re.compile(r"sk-(?!ant-)[A-Za-z0-9]{20,}"), "OpenAI API key"),
+    (re.compile(r"AIza[0-9A-Za-z_-]{35}"), "Google API key"),
+    (re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"), "private key"),
+    (
+        re.compile(r"(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis|amqp)://[^\s:@/]+:[^\s@/]+@"),
+        "inline database password",
+    ),
+]
+
+
+def _detect_secrets(text: str) -> list[str]:
+    """Distinct TYPES of hardcoded secrets found in `text` (never the values)."""
+    found: list[str] = []
+    for pattern, label in _SECRET_PATTERNS:
+        if label not in found and pattern.search(text):
+            found.append(label)
+    return found
+
 _SHELL_TYPE_PATTERNS = ("shell", "terminal", "command", "exec")
 _NETWORK_TYPE_PATTERNS = ("http", "fetch", "api", "browser")
 _DB_TYPE_PATTERNS = ("postgres", "mysql", "sqlite", "mongo", "database")
@@ -81,6 +108,7 @@ _WEIGHTS = {
     "no_description": 3,
     "docker_access": 20,
     "database_access": 15,
+    "hardcoded_secret": 30,
 }
 
 
@@ -188,6 +216,10 @@ def _analyze_command(command: str) -> dict[str, Any]:
     if "sudo" in lower:
         score += 15
         factors.append("Elevated privileges (sudo)")
+    hardcoded = _detect_secrets(command)
+    if hardcoded:
+        score += min(len(hardcoded), 2) * _WEIGHTS["hardcoded_secret"]
+        factors.append(f"Hardcoded credential in config: {', '.join(hardcoded[:3])}")
     return {"score": score, "factors": factors}
 
 
