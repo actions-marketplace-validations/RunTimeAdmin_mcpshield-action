@@ -1,5 +1,5 @@
 name: 'MCPShield MCP Config Scan'
-description: 'Static risk scan of committed MCP config files (mcp.json, cline_mcp_settings.json, claude_desktop_config.json). Catch risky MCP servers in a PR before merge.'
+description: 'Catch risky MCP servers in committed config files and fail the PR before merge. Zero deps, no API key, no network.'
 author: 'MCPShield'
 
 branding:
