@@ -373,7 +373,15 @@ def discover_files(root: Path, patterns: list[str]) -> list[Path]:
     if patterns:
         found: list[Path] = []
         for pat in patterns:
-            found.extend(sorted(root.glob(pat)))
+            p = Path(pat)
+            if p.anchor:
+                # pathlib rejects non-relative glob patterns (those with a drive or
+                # root); anchor the glob there and match the remainder. Handles plain
+                # absolute paths and absolute wildcards alike.
+                anchor = Path(p.anchor)
+                found.extend(sorted(anchor.glob(str(p.relative_to(anchor)))))
+            else:
+                found.extend(sorted(root.glob(pat)))
     else:
         found = []
         for name in _DEFAULT_CONFIG_NAMES:
